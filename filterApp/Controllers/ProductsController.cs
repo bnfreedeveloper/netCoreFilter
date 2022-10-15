@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System;
 using filterApp.Filters;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Text.Json;
 
 namespace filterApp.Controllers
 {
@@ -22,10 +23,12 @@ namespace filterApp.Controllers
             new Product { Id = 2, Name ="alibaba product"}
         };
 
+        private static List<string> values = new List<string>();
+
         [HttpGet]
         [DebugRessourceFilterMethodOnly]
         //ACTION FILTER FOR THIS METHOD SPECIFICALLY TOO IS POSSIBLE,if so both actionfilte will be executed
-        //[DebugActionFilter]
+        [DebugActionFilter]
         [TokenAuthenticationFilter]
         public async Task<IActionResult> Get()
         {
@@ -54,6 +57,20 @@ namespace filterApp.Controllers
         public async Task<IActionResult> Test(int id, string name)
         {
             return Ok($"{id} : {name}");
+        }
+        [HttpGet("values")]
+        public async Task<IActionResult> GetValues()
+        {
+
+            List<Task> valuesAsync = new List<Task>()
+            {
+                Task.Run(() => ProductsController.values.Add("first")),
+                Task.Run(() =>  ProductsController.values.Add("second")),
+                Task.Run(() =>  ProductsController.values.Add("third")),
+                Task.Run(() =>  ProductsController.values.Add("fourth")),
+            };
+            await Task.WhenAll(valuesAsync);
+            return Ok(values);
         }
 
     }
